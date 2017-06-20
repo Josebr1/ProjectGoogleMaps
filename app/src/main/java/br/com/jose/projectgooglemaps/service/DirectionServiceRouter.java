@@ -1,6 +1,7 @@
 package br.com.jose.projectgooglemaps.service;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -35,12 +36,14 @@ public class DirectionServiceRouter {
     private RoutingListener listener;
     private String origin;
     private String destination;
+    private String mode;
 
 
-    public DirectionServiceRouter(RoutingListener listener, String origin, String destination) {
+    public DirectionServiceRouter(RoutingListener listener, String origin, String destination, String mode) {
         this.listener = listener;
         this.origin = origin;
         this.destination = destination;
+        this.mode = mode;
     }
 
 
@@ -52,9 +55,10 @@ public class DirectionServiceRouter {
     private String createUrl() throws UnsupportedEncodingException {
         String urlOrigin = URLEncoder.encode(origin, "utf-8");
         String urlDestination = URLEncoder.encode(destination, "utf-8");
+        String urlMode = URLEncoder.encode(mode, "utf-8");
 
         return DIRECTION_URL_API + "origin=" + urlOrigin
-                + "&destination=" + urlDestination + "&key=" + GOOGLE_API_KEY;
+                + "&destination=" + urlDestination + "&mode=" + urlMode;
     }
 
     private class DownloadRawData extends AsyncTask<String, Void, String> {
@@ -75,6 +79,7 @@ public class DirectionServiceRouter {
                     buffer.append(line + "\n");
                 }
 
+                Log.i("doInBackground", buffer.toString());
                 return buffer.toString();
 
             } catch (MalformedURLException e) {
@@ -101,6 +106,7 @@ public class DirectionServiceRouter {
             return;
         }
         List<Router> routes = new ArrayList<>();
+        //List<String> infoPoints = new ArrayList<>();
         JSONObject jsonData = new JSONObject(data);
         JSONArray jsonRoutes = jsonData.getJSONArray("routes");
         for (int i = 0; i < jsonRoutes.length(); i++) {
@@ -119,9 +125,12 @@ public class DirectionServiceRouter {
             route.setDuration(new Duration(jsonDuration.getString("text"), jsonDuration.getInt("value")));
             route.setEndAddress(jsonLeg.getString("end_address"));
             route.setStartAddress(jsonLeg.getString("start_address"));
+            //infoPoints.add(jsonLeg.getString("html_instructions"));
             route.setStartLocation(new LatLng(jsonStartLocation.getDouble("lat"), jsonStartLocation.getDouble("lng")));
             route.setEndLocation(new LatLng(jsonEndLocation.getDouble("lat"), jsonEndLocation.getDouble("lng")));
             route.setPoits(decodePolyLine(overview_polylineJson.getString("points")));
+
+            Log.i("DirectionService", i + "");
 
             routes.add(route);
         }
@@ -132,7 +141,7 @@ public class DirectionServiceRouter {
     private List<LatLng> decodePolyLine(final String poly) {
         int len = poly.length();
         int index = 0;
-        List<LatLng> decoded = new ArrayList<LatLng>();
+        List<LatLng> decoded = new ArrayList<>();
         int lat = 0;
         int lng = 0;
 

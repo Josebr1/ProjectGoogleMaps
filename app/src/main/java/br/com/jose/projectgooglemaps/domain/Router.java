@@ -18,6 +18,7 @@ public class Router {
     private String startAddress;
     private LatLng startLocation;
     private List<LatLng> poits;
+    //private List<String> inforPoint;
 
     public Distance getDistance() {
         return distance;
@@ -74,4 +75,12 @@ public class Router {
     public void setPoits(List<LatLng> poits) {
         this.poits = poits;
     }
+
+    //public List<String> getInforPoint() {
+     //   return inforPoint;
+    //}
+
+    //public void setInforPoint(List<String> setInforPoint) {
+    //    this.inforPoint = setInforPoint;
+    //}
 }
